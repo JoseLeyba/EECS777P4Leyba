@@ -5,6 +5,11 @@ import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [token, setToken] = useState(window.sessionStorage.getItem("token"));
+
+  if (token === undefined || token === null){
+    return <p>Hello! Me is not defined yet</p>
+  }
 
   return (
     <>
