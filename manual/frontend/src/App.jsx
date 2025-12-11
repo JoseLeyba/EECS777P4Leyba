@@ -2,13 +2,13 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-
+import {Login} from './Login.jsx'
 function App() {
   const [count, setCount] = useState(0)
   const [token, setToken] = useState(window.sessionStorage.getItem("token"));
 
   if (token === undefined || token === null){
-    return <p>Hello! Me is not defined yet</p>
+    return <Login tokenSetter={setToken} />
   }
 
   return (
