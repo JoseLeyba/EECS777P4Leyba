@@ -1,0 +1,17 @@
+function authenticate(req, res, next){
+    const token = req.cookies.accessToken;
+    if (!token) return res.status(401).json({error: "No Access Token"});
+    try {
+        const userData = verifyToken(token, "your-access-secret");
+        req.user = userData;
+        next();
+    }
+    catch (err) {
+        return res.status(401).json({error: "Access Token expired or invalid"});
+    }
+}
+
+app.post("/notes", authenticate, (req, res) => {
+    res.json({ message: 'Note saved for ${req.user.username}'});
+
+});

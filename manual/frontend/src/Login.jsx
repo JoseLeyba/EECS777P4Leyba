@@ -1,6 +1,6 @@
 import {useState} from 'react'
 import axios from "axios"
-const CREATE_END = "http://localhost:3002"
+const CREATE_END = "http://localhost:3002/login"
 export function Login({tokenSetter}){
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
