@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react'
 import './App.css'
 import axios from "axios"
+import {Register} from './Register.jsx'
 const CREATE_END = "http://localhost:3002/login"
 export function Login({tokenSetter}){
     const [name, setName] = useState("");
@@ -35,6 +36,8 @@ export function Login({tokenSetter}){
         <input type="submit" />
         </p>
         </form>
+        <p></p>
+        <Register tokenSetter={tokenSetter} />
         </div>
     );
 }

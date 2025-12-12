@@ -116,4 +116,37 @@ app.post("/delete", function(req, resp){
 
 });
 
+
+app.post("/register", function(req, resp){
+    const name = req.body.name;
+    const pw = req.body.pw;
+    const QCHECK =
+    "SELECT id FROM accounts WHERE name = ?";
+
+    db.get(QCHECK, [name],  function(err, row) {
+        if (row) {
+        return resp.status(400).json({
+                    ok: false,
+                    error: "Username already exists."});
+        }
+        
+        const Q =
+        "INSERT INTO accounts (name, pw, acc_type) VALUES (?, ?, 'user')";
+
+        db.run(Q, [name, pw],  function(err2, row) {
+        if (err2) {
+        console.log("DB error:", err2);
+        return;
+        }
+
+        const creds = { name: name, id: this.lastID, acc_type: "user" };
+        const token = encodeJWT(creds, SECRET)
+        const result = { ok: true, token: token };
+        resp.send(JSON.stringify(result));
+
+        });
+    });
+});
+
+
 app.listen(3002)
