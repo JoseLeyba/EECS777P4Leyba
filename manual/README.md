@@ -1,10 +1,6 @@
 
 Prerequisites
-
 - Node.js 18+ installed
-- PostgreSQL database
-
-
 
 
 Installation
@@ -15,7 +11,10 @@ Installation
 
 2. Open two terminals, in the first one run the following
    ```bash
+   sudo apt install sqlite3 libsqlite3-dev
+   
    cd <your_path_to_backend>
+   npm install
    nodejs index.js
 
    ```
@@ -25,6 +24,7 @@ Installation
 
    ```bash
    cd <your_path_to_frontend>
+   npm install
    npm run dev
    ```
 
