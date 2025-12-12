@@ -1,5 +1,7 @@
 import {useEffect, useState} from 'react'
 import './App.css'
+import Add from "./Add.jsx"
+
 import axios from "axios"
 const CREATE_END = "http://localhost:3002/home"
 
@@ -39,6 +41,7 @@ export default function PostList({auth, setAuth}){
                     </li>
             )}
         </ul>  
+        <Add auth={auth} setData={setData} />
         <input type="button" defaultValue={"Log out"}
             onClick={function(){
                 window.sessionStorage.removeItem('token');
