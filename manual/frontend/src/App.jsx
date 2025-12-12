@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 
 import './App.css'
 import {Login} from './Login.jsx'
+import PostList from './Home.jsx';
+
 //import './TaskList.jsx'
 
 
@@ -12,7 +14,7 @@ export default function App() {
     return <Login tokenSetter={setToken} />
   }
   else{
-    return (<p>{"Logged in!!!!"}</p>); 
+    return <PostList auth={token} setAuth={setToken} />; 
   }
 
 }

@@ -33,5 +33,27 @@ app.post("/login", function(req, resp){
     });
 });
 
+app.post("/home", function(req, resp){
+    //Without the || I crashed when undef :(
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    const Q =
+    "SELECT id, url FROM urls";
+
+    db.all(Q, function(err, rows) {
+    if (err) {
+      console.log("DB error:", err);
+      //Still send an empty list of urls to not crash rlly badly
+      resp.status(500).json({ urls: [] });
+      return;
+    }
+    const urls = rows.map(r => ({
+      id: r.id,
+      name: r.url,
+    }));
+    resp.json({urls});
+    });
+});
+
 
 app.listen(3002)
