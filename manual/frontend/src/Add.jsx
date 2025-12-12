@@ -14,11 +14,14 @@ export default function Add({auth, setData}){
         if (newUrl == ""){
             //probably better to make sure it is also a valid url (in format at least)
             alert("Please enter some txt")
+            return;
         }
         let body = {url:newUrl};
         let config = {'headers': { Authorization: "Bearer "+ auth}};
         const response = await axios.post(CREATE_END, body, config)
         .catch(function(err){ console.log("catch err is: ", err)});
+        window.location.reload();
+
     };
 
     return (

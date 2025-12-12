@@ -36,7 +36,7 @@ app.post("/login", function(req, resp){
 app.post("/home", function(req, resp){
     //Without the || I crashed when undef :(
     const authHeader = req.headers.authorization || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    const token = decodeJWT(authHeader.substring(7, authHeader.length), SECRET)
     const Q =
     "SELECT id, url FROM urls";
 
@@ -52,6 +52,24 @@ app.post("/home", function(req, resp){
       name: r.url,
     }));
     resp.json({urls});
+    });
+});
+
+app.post("/add", function(req, resp){
+    const authHeader = req.headers.authorization || "";
+    const token = decodeJWT(authHeader.substring(7, authHeader.length), SECRET)
+    const id = token.id;
+    const name = req.body.url;
+
+    const Q = "INSERT INTO urls (user_id, url) VALUES (?, ?)";
+    db.run(Q, [id, name], function(err) {
+    if (err) {
+      console.log("DB error:", err);
+      return;
+    }
+    console.log("Inserted Successfully on Q: ",Q);
+    resp.send(JSON.stringify({'success':true}));
+
     });
 });
 
