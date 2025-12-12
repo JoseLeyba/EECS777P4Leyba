@@ -9,14 +9,20 @@ export function Login({tokenSetter}){
 
     const handleSubmit = async function(e){
         e.preventDefault();
-
+        try{
         let params = {name:name, pw:password};
         const response = await axios.post(CREATE_END, params)
-        .catch(function(err){ console.log("catch err is: ", err)});
-        const t = response.data.token;
-        window.sessionStorage.setItem('token', t);
-        tokenSetter(t);
+        if (response.data && response.data.ok) {
+            const t = response.data.token;
+            window.sessionStorage.setItem('token', t);
+            tokenSetter(t);
+            } 
 
+        }catch(err){
+            if (err.response && err.response.data && err.response.data.error) {
+                alert(err.response.data.error);
+            }
+        }
     };
 
 

@@ -4,7 +4,18 @@ import axios from "axios"
 const CREATE_END = "http://localhost:3002/add"
 
 
-
+function isValidUrl(str) {
+  try {
+    const u = new URL(str);
+    if (/\s/.test(str)) {
+        alert("URLs cannot contain spaces. Replace spaces with %20.");
+        return false;
+    }
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 export default function Add({auth, setData}){
     const [newUrl, setnewUrl] = useState("");
@@ -16,6 +27,10 @@ export default function Add({auth, setData}){
             alert("Please enter some txt")
             return;
         }
+        if (!isValidUrl(newUrl)){
+            alert("This isn't a valid link. Try again")
+            return;
+        } 
         let body = {url:newUrl};
         let config = {'headers': { Authorization: "Bearer "+ auth}};
         const response = await axios.post(CREATE_END, body, config)

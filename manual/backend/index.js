@@ -23,8 +23,12 @@ app.post("/login", function(req, resp){
 
     db.get(Q, function(err, row) {
     if (!row) {
-      resp.send(JSON.stringify({ ok:false }));
-      return;
+    return resp
+      .status(401)
+      .json({
+        ok: false,
+        error: "No users were found with these credentials, please try again.",
+      });
     }
     const creds = { name: row["name"], id: row["id"], acc_type: row["acc_type"] };
     const token = encodeJWT(creds, SECRET)
