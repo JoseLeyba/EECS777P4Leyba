@@ -73,5 +73,29 @@ app.post("/add", function(req, resp){
     });
 });
 
+//Delete is just like add
+app.post("/delete", function(req, resp){
+    const authHeader = req.headers.authorization || "";
+    const token = decodeJWT(authHeader.substring(7, authHeader.length), SECRET)
+    const id = token.id;
+    const name = req.body.id;
+
+    const Q = "DELETE FROM urls WHERE id = ? AND user_id = ?";
+    db.run(Q, [name, id], function(err) {
+    if (err) {
+      console.log("DB error:", err);
+      return;
+    }
+    if (this.changes === 0) {
+        return resp.status(403).json({
+        success: false,
+        error: "You can only delete your own URLs.",
+      });
+    }
+
+    resp.json({ success: true });
+
+    });
+});
 
 app.listen(3002)
