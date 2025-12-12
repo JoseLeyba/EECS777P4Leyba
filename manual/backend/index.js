@@ -18,10 +18,9 @@ app.post("/login", function(req, resp){
     const pw = req.body.pw;
     const Q =
     "SELECT name,id, acc_type FROM accounts" +
-    " WHERE pw = '" + pw +
-    "' AND name = '" + name + "'";
+    " WHERE pw = ? AND name = ?";
 
-    db.get(Q, function(err, row) {
+    db.get(Q,[pw, name] ,function(err, row) {
     if (!row) {
     return resp
       .status(401)
