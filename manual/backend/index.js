@@ -2,25 +2,65 @@ import express from 'express';
 import cors from 'cors';
 import sqlite3 from 'sqlite3';
 import crypto from 'crypto';
-
+import bcrypt from 'bcryptjs';
 import {decodeJWT, encodeJWT} from './token.js'
+import dotenv from "dotenv";
+dotenv.config();
 
 
-const SECRET = "MY_SUPER_SECRET";
+const SECRET = process.env.SECRET;
+if (!SECRET) {
+    console.error("FATAL ERROR: SECRET not found in environment.");
+    process.exit(1);
+}
 const app = express()
 app.use(cors())
 app.use(express.json())
 
 const db = new sqlite3.Database("tasks.db", sqlite3.OPEN_READWRITE);
 //Modified minimally so we also get the account type
+
+
+//CREATE TABLES (and admin acc) at start 
+db.serialize(() => {
+db.run(`
+    CREATE TABLE IF NOT EXISTS accounts (
+      id       INTEGER PRIMARY KEY AUTOINCREMENT,
+      name     TEXT NOT NULL UNIQUE,
+      pw       TEXT NOT NULL,
+      acc_type TEXT NOT NULL
+    )
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS urls (
+      id      INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      url     TEXT NOT NULL,
+      FOREIGN KEY(user_id) REFERENCES accounts(id)
+    )
+  `);
+  const hashedAdminPw = bcrypt.hashSync("admin", 10);
+  db.get(
+    "SELECT id, pw, acc_type FROM accounts WHERE name = ?",
+    ["admin"],
+    (err, row) => {
+      if (!row) {
+        db.run(
+          "INSERT INTO accounts (name, pw, acc_type) VALUES (?, ?, 'admin')",
+          ["admin", hashedAdminPw])
+        }
+    });
+});
+
+
 app.post("/login", function(req, resp){
     const name = req.body.name;
     const pw = req.body.pw;
     const Q =
-    "SELECT name,id, acc_type FROM accounts" +
-    " WHERE pw = ? AND name = ?";
+    "SELECT name,id, pw, acc_type FROM accounts" +
+    " WHERE name = ?";
 
-    db.get(Q,[pw, name] ,function(err, row) {
+    db.get(Q,[name] ,function(err, row) {
     if (!row) {
     return resp
       .status(401)
@@ -28,6 +68,17 @@ app.post("/login", function(req, resp){
         ok: false,
         error: "No users were found with these credentials, please try again.",
       });
+    }
+
+    const storedHash = row.pw;
+    //Compare hashes
+    const valid = bcrypt.compareSync(pw, storedHash);
+    if (!valid) {
+        return resp.status(401).json({
+            ok: false,
+            error:
+            "No users were found with these credentials, please try again.",
+        });
     }
     const creds = { name: row["name"], id: row["id"], acc_type: row["acc_type"] };
     const token = encodeJWT(creds, SECRET)
@@ -123,6 +174,7 @@ app.post("/delete", function(req, resp){
 app.post("/register", function(req, resp){
     const name = req.body.name;
     const pw = req.body.pw;
+    const hashedPw = bcrypt.hashSync(pw, 10);
     const QCHECK =
     "SELECT id FROM accounts WHERE name = ?";
 
@@ -136,7 +188,7 @@ app.post("/register", function(req, resp){
         const Q =
         "INSERT INTO accounts (name, pw, acc_type) VALUES (?, ?, 'user')";
 
-        db.run(Q, [name, pw],  function(err2, row) {
+        db.run(Q, [name, hashedPw],  function(err2, row) {
         if (err2) {
         console.log("DB error:", err2);
         return;
