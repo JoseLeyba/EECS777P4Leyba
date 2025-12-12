@@ -32,7 +32,11 @@ export default function PostList({auth, setAuth}){
         Articles
         <ul>
             {data.urls.map((item, idx)=>
-                    <li>{item.name}</li>
+                    <li>
+                        <a href={item.name} target="_blank" rel="noreferrer">
+                            {item.name}
+                        </a>
+                    </li>
             )}
         </ul>  
         <input type="button" defaultValue={"Log out"}
