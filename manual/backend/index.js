@@ -12,11 +12,12 @@ app.use(cors())
 app.use(express.json())
 
 const db = new sqlite3.Database("tasks.db", sqlite3.OPEN_READWRITE);
+//Modified minimally so we also get the account type
 app.post("/login", function(req, resp){
     const name = req.body.name;
     const pw = req.body.pw;
     const Q =
-    "SELECT name,id FROM accounts" +
+    "SELECT name,id, acc_type FROM accounts" +
     " WHERE pw = '" + pw +
     "' AND name = '" + name + "'";
 
@@ -25,7 +26,7 @@ app.post("/login", function(req, resp){
       resp.send(JSON.stringify({ ok:false }));
       return;
     }
-    const creds = { name: row["name"], id: row["id"] };
+    const creds = { name: row["name"], id: row["id"], acc_type: row["acc_type"] };
     const token = encodeJWT(creds, SECRET)
     const result = { ok: true, token: token };
     resp.send(JSON.stringify(result));
@@ -78,24 +79,41 @@ app.post("/delete", function(req, resp){
     const authHeader = req.headers.authorization || "";
     const token = decodeJWT(authHeader.substring(7, authHeader.length), SECRET)
     const id = token.id;
+    const accType = token.acc_type;
     const name = req.body.id;
-
-    const Q = "DELETE FROM urls WHERE id = ? AND user_id = ?";
-    db.run(Q, [name, id], function(err) {
-    if (err) {
-      console.log("DB error:", err);
-      return;
+    let Q;
+    let params;
+    if (accType === "admin"){
+        const Q = "DELETE FROM urls WHERE id = ?";
+        params = [name];
+        db.run(Q, params, function(err) {
+            if (err) {
+                console.log("DB error:", err);
+                return;
+            }
+            resp.json({ success: true });
+        });
     }
-    if (this.changes === 0) {
-        return resp.status(403).json({
-        success: false,
-        error: "You can only delete your own URLs.",
-      });
+    else{
+        const Q = "DELETE FROM urls WHERE id = ? AND user_id = ?";
+        params = [name, id];
+        db.run(Q, params, function(err) {
+            if (err) {
+                console.log("DB error:", err);
+                return;
+            }
+            if (this.changes === 0) {
+                return resp.status(403).json({
+                success: false,
+                error: "You can only delete your own URLs.",
+        });
+        }
+
+        resp.json({ success: true });
+
+        });
     }
 
-    resp.json({ success: true });
-
-    });
 });
 
 app.listen(3002)
