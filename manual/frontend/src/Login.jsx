@@ -1,4 +1,5 @@
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
+import './App.css'
 import axios from "axios"
 const CREATE_END = "http://localhost:3002/login"
 export function Login({tokenSetter}){
@@ -8,9 +9,14 @@ export function Login({tokenSetter}){
     const handleSubmit = async function(e){
         e.preventDefault();
 
-        const params = {username:name, pw:password}
-        axios.post(CREATE_END, params)
-    }
+        let params = {name:name, pw:password};
+        const response = await axios.post(CREATE_END, params)
+        .catch(function(err){ console.log("catch err is: ", err)});
+        const t = response.data.token;
+        window.sessionStorage.setItem('token', t);
+        tokenSetter(t);
+
+    };
 
 
     return (

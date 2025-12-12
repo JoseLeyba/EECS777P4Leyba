@@ -3,7 +3,7 @@ import cors from 'cors';
 import sqlite3 from 'sqlite3';
 import crypto from 'crypto';
 
-//import {decodeJWT, encodeJWT} from './token.js'
+import {decodeJWT, encodeJWT} from './token.js'
 
 
 const SECRET = "MY_SUPER_SECRET";
@@ -26,6 +26,7 @@ app.post("/login", function(req, resp){
       return;
     }
     const creds = { name: row["name"], id: row["id"] };
+    const token = encodeJWT(creds, SECRET)
     const result = { ok: true, token: token };
     resp.send(JSON.stringify(result));
 
